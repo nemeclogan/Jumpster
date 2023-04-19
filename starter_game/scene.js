@@ -5,6 +5,7 @@ class Scene {
     this.load.image('ground', 'assets/platform.png');
     this.load.image('star', 'assets/star.png');
     this.load.image('bomb', 'assets/bomb.png');
+    this.load.image('apple', 'assets/apple.png');
     this.load.audio('BGM', 'assets/BGM.mp3');
     this.load.spritesheet('dude', 'assets/dude.png', { frameWidth: 32, frameHeight: 48 });
     this.load.spritesheet('player1', 'assets/Player1Cat.png', { frameWidth: 12, frameHeight: 12 });
