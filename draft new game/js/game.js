@@ -1,0 +1,225 @@
+
+var config = {
+    type: Phaser.AUTO,
+    width: 800,
+    height: 600,
+    physics: {
+        default: 'arcade',
+        arcade: {
+            gravity: { y: 300 },
+            debug: false
+        }
+    },
+    scene: {
+        preload: preload,
+        create: create,
+        update: update
+    }
+};
+
+var player;
+var stars;
+var bombs;
+var platforms;
+var cursors;
+var score = 0;
+var gameOver = false;
+var scoreText;
+
+window.addEventListener('load', function() {
+    var game = new Phaser.Game(config);
+});
+
+function preload ()
+{
+    this.load.image('sky', 'assets/sky.png');
+    this.load.image('ground', 'assets/platform.png');
+    this.load.image('apple', 'assets/apple.png');
+    this.load.image('bomb', 'assets/bomb.png');
+    this.load.spritesheet('player1', 'assets/CatIdle.png', { frameWidth: 48, frameHeight: 48 });
+
+    this.load.spritesheet('player1run', 'assets/CatWalk.png', { frameWidth: 48, frameHeight: 48 });
+    this.load.spritesheet('player1runL', 'assets/CatWalkL.png', { frameWidth: 48, frameHeight: 48 });
+
+    this.load.spritesheet('player1hurt', 'assets/CatHurt.png', { frameWidth: 48, frameHeight: 48 });
+}
+
+function create ()
+{
+
+    this.cameras.main.setBounds(0, 0, 800, 600);
+
+    //  A simple background for our game
+    this.add.image(400, 300, 'sky');
+
+    //  The platforms group contains the ground and the 2 ledges we can jump on
+    platforms = this.physics.add.staticGroup();
+
+    //  Here we create the ground.
+    //  Scale it to fit the width of the game (the original sprite is 400x32 in size)
+    platforms.create(400, 568, 'ground').setScale(2).refreshBody();
+
+    //  Now let's create some ledges
+    platforms.create(600, 400, 'ground');
+    platforms.create(50, 250, 'ground');
+    platforms.create(750, 220, 'ground');
+
+    // The player and its settings
+    playerA = this.physics.add.sprite(100, 450, 'player1');
+
+
+
+    //  Player physics properties. Give the little guy a slight bounce.
+    playerA.setBounce(0.2);
+    playerA.setCollideWorldBounds(true);
+
+    //  Our player animations, turning, walking left and walking right.
+    this.anims.create({
+        key: 'left',
+        frames: this.anims.generateFrameNumbers('player1runL', { start: 0, end: 6 }),
+        frameRate: 10,
+        repeat: -1
+    });
+
+    this.anims.create({
+        key: 'turn',
+        frames: [ { key: 'player1', frame: 4 } ],
+        frameRate: 20
+    });
+
+    this.anims.create({
+        key: 'right',
+        frames: this.anims.generateFrameNumbers('player1run', { start: 1, end: 6 }),
+        frameRate: 10,
+        repeat: -1
+    });
+
+    this.anims.create({
+        key: 'hurt',
+        frames: [ {key: 'player1hurt', frame: 2} ],
+        freameRate:20
+    })
+
+    this.anims.create({
+        key: 'idle',
+        frames: [ { key: 'player1', frame: 4 } ],
+        frameRate: 20
+    });
+
+    //  Input Events
+    cursors = this.input.keyboard.createCursorKeys();
+
+    //  Some apples to collect, 12 in total, evenly spaced 70 pixels apart along the x axis
+    apples = this.physics.add.group({
+        key: 'apple',
+        repeat: 11,
+        setXY: { x: 12, y: 0, stepX: 70 }
+    });
+
+    apples.children.iterate(function (child) {
+
+        //  Give each apple a slightly different bounce
+        child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+
+    });
+
+    bombs = this.physics.add.group();
+
+    //  The score
+    scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
+
+    //  Collide the playerA and the apples with the platforms
+    this.physics.add.collider(playerA, platforms);
+    this.physics.add.collider(apples, platforms);
+    this.physics.add.collider(bombs, platforms);
+
+    //  Checks to see if the player overlaps with any of the apples, if he does call the collectStar function
+    this.physics.add.overlap(playerA, apples, collectApple, null, this);
+
+    this.physics.add.collider(playerA, bombs, hitBomb, null, this);
+}
+
+function update ()
+{
+    if (gameOver)
+    {
+        playerA.anims.play('hurt', true);
+        return;
+    }
+
+    // If the player is not moving, play the 'idle' animation
+    if (playerA.body.velocity.x === 0 && playerA.body.velocity.y === 0) {
+        playerA.anims.play('idle', true);
+    }
+
+    if (cursors.left.isDown)
+    {
+        playerA.setVelocityX(-160);
+
+        playerA.anims.play('left', true);
+    }
+    else if (cursors.right.isDown)
+    {
+        playerA.setVelocityX(160);
+
+        playerA.anims.play('right', true);
+    }
+    else
+    {
+        playerA.setVelocityX(0);
+
+        // If the player is not moving left or right, play the 'idle' animation
+        if (playerA.body.velocity.y === 0) {
+            playerA.anims.play('idle', true);
+        } else {
+            playerA.anims.play('turn');
+        }
+    }
+
+    if (cursors.up.isDown && playerA.body.touching.down)
+    {
+        playerA.setVelocityY(-330);
+    }
+}
+
+
+function collectApple (playerA, apple)
+{
+    apple.disableBody(true, true);
+
+    //  Add and update the score
+    score += 10;
+    scoreText.setText('Score: ' + score);
+
+    if (apples.countActive(true) === 0)
+    {
+        //  A new batch of apples to collect
+        apples.children.iterate(function (child) {
+
+            child.enableBody(true, child.x, 0, true, true);
+
+        });
+
+        var x = (playerA.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
+
+        var bomb = bombs.create(x, 16, 'bomb');
+        bomb.setBounce(1);
+        bomb.setCollideWorldBounds(true);
+        bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
+        bomb.allowGravity = false;
+
+    }
+}
+
+function hitBomb (playerA, bomb)
+{
+    this.physics.pause();
+
+    playerA.setTint(0xff0000);
+
+    playerA.anims.play('hurt'); 
+
+    playerA.setVelocity(0, 0);
+
+    gameOver = true;
+}

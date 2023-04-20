@@ -1,0 +1,33 @@
+Hi yall! 
+
+So I was able to make a good amount of progress on the game. I just started completely new files 
+on my local device and then now I'm adding it to the repo, just because that way was easier for my brain.
+
+First, I had to find new spritesheet characters because the ones that we had were acting 
+wonky and I couldnt figure out why. So I found new ones. Good news is also, I found 
+new ones in the same package from the same creator, so they look cohesive and fit our animal theme.
+
+So, I added the new cat and updated all the frames so that it can be shown idle and running. 
+
+
+The next steps I think would be to now do the same for our other character, the dog. 
+I already added the spritesheets for the dog animations and they follow the same naming 
+conventions as our cat, so hopefully it will be easy to figure out how to add our dog. 
+
+When you play the game, once you collect all the apples, then more fall down and so does a 
+bomb. If the cat hits the bomb then the game is over and the cat turns red and stops moving.
+I think it would be nice if we can add an actual game over screen. I'm not 100% how to do that
+off the top of my head, but I'm sure we can figure it out. If its easy to do then I think we should do it.
+If not, no need. 
+
+
+This is just another suggestion but maybe we should change the apple to be something else. 
+Maybe like a treat or something so that it fits more with our theme. I also think if possible we should try to change maybe like the platforms and our background
+so that they fit our theme more. I know that is a bit extra but I think it would be cuter!
+I am open to working on these 'graphics' aspects if you all are cool with it!!
+
+
+I am going to be busy most of the day today but once I get home I can also contribute to the 
+powerpoint as well!!
+
+-Stephanie
