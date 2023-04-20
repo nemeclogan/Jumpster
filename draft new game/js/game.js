@@ -22,6 +22,7 @@ var stars;
 var bombs;
 var platforms;
 var cursors;
+var keys;
 var score = 0;
 var gameOver = false;
 var scoreText;
@@ -68,15 +69,18 @@ function create ()
     platforms.create(750, 220, 'ground');
 
     // The player and its settings
-    playerA = this.physics.add.sprite(100, 450, 'player1');
-
+    playerA = this.physics.add.sprite(400, 450, 'player1');
+    playerB = this.physics.add.sprite(100, 450, 'player2');
 
 
     //  Player physics properties. Give the little guy a slight bounce.
     playerA.setBounce(0.2);
     playerA.setCollideWorldBounds(true);
+    playerB.setBounce(0.2);
+    playerB.setCollideWorldBounds(true);
 
     //  Our player animations, turning, walking left and walking right.
+    // Player 1
     this.anims.create({
         key: 'left',
         frames: this.anims.generateFrameNumbers('player1runL', { start: 0, end: 6 }),
@@ -109,8 +113,42 @@ function create ()
         frameRate: 20
     });
 
+    // Player 2
+    this.anims.create({
+        key: 'left2',
+        frames: this.anims.generateFrameNumbers('player2runL', { start: 0, end: 6 }),
+        frameRate: 10,
+        repeat: -1
+    });
+
+    this.anims.create({
+        key: 'turn2',
+        frames: [ { key: 'player2', frame: 4 } ],
+        frameRate: 20
+    });
+
+    this.anims.create({
+        key: 'right2',
+        frames: this.anims.generateFrameNumbers('player2run', { start: 1, end: 6 }),
+        frameRate: 10,
+        repeat: -1
+    });
+
+    this.anims.create({
+        key: 'hurt2',
+        frames: [ {key: 'player2hurt', frame: 2} ],
+        freameRate:20
+    })
+
+    this.anims.create({
+        key: 'idle2',
+        frames: [ { key: 'player2', frame: 4 } ],
+        frameRate: 20
+    });
+
     //  Input Events
     cursors = this.input.keyboard.createCursorKeys();
+    keys = this.input.keyboard.addKeys('W,A,D');
 
     //  Some apples to collect, 12 in total, evenly spaced 70 pixels apart along the x axis
     apples = this.physics.add.group({
@@ -131,15 +169,17 @@ function create ()
     //  The score
     scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
 
-    //  Collide the playerA and the apples with the platforms
+    //  Collide the players and the apples with the platforms
     this.physics.add.collider(playerA, platforms);
+    this.physics.add.collider(playerB, platforms);
     this.physics.add.collider(apples, platforms);
     this.physics.add.collider(bombs, platforms);
 
     //  Checks to see if the player overlaps with any of the apples, if he does call the collectStar function
     this.physics.add.overlap(playerA, apples, collectApple, null, this);
-
+    this.physics.add.overlap(playerB, apples, collectApple, null, this);
     this.physics.add.collider(playerA, bombs, hitBomb, null, this);
+    this.physics.add.collider(playerB, bombs, hitBomb, null, this);
 }
 
 function update ()
@@ -151,8 +191,12 @@ function update ()
     }
 
     // If the player is not moving, play the 'idle' animation
+    // Player 1
     if (playerA.body.velocity.x === 0 && playerA.body.velocity.y === 0) {
         playerA.anims.play('idle', true);
+    }
+    if (playerB.body.velocity.x === 0 && playerB.body.velocity.y === 0) {
+        playerA.anims.play('idle2', true);
     }
 
     if (cursors.left.isDown)
@@ -182,6 +226,35 @@ function update ()
     if (cursors.up.isDown && playerA.body.touching.down)
     {
         playerA.setVelocityY(-330);
+    }
+    // Player 2
+    if (keys.A.isDown)
+    {
+        playerB.setVelocityX(-160);
+
+        playerB.anims.play('left2', true);
+    }
+    else if (keys.D.isDown)
+    {
+        playerB.setVelocityX(160);
+
+        playerB.anims.play('right2', true);
+    }
+    else
+    {
+        playerB.setVelocityX(0);
+
+        // If the player is not moving left or right, play the 'idle' animation
+        if (playerB.body.velocity.y === 0) {
+            playerB.anims.play('idle2', true);
+        } else {
+            playerB.anims.play('turn2');
+        }
+    }
+
+    if (keys.W.isDown && playerB.body.touching.down)
+    {
+        playerB.setVelocityY(-330);
     }
 }
 
@@ -216,13 +289,14 @@ function collectApple (playerA, apple)
 
 function hitBomb (playerA, bomb)
 {
+    playerA.anims.play('idle', true);
+    playerB.anims.play('idle2', true);
     this.physics.pause();
 
     playerA.setTint(0xff0000);
-
-    playerA.anims.play('hurt'); 
-
+    playerB.setTint(0xff0000);
     playerA.setVelocity(0, 0);
+    playerB.setVelocity(0, 0);
 
     gameOver = true;
 }
