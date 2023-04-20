@@ -36,12 +36,15 @@ function preload ()
     this.load.image('ground', 'assets/platform.png');
     this.load.image('apple', 'assets/apple.png');
     this.load.image('bomb', 'assets/bomb.png');
-    this.load.spritesheet('player1', 'assets/CatIdle.png', { frameWidth: 48, frameHeight: 48 });
 
+    this.load.spritesheet('player1', 'assets/CatIdle.png', { frameWidth: 48, frameHeight: 48 });
     this.load.spritesheet('player1run', 'assets/CatWalk.png', { frameWidth: 48, frameHeight: 48 });
     this.load.spritesheet('player1runL', 'assets/CatWalkL.png', { frameWidth: 48, frameHeight: 48 });
-
     this.load.spritesheet('player1hurt', 'assets/CatHurt.png', { frameWidth: 48, frameHeight: 48 });
+
+    this.load.spritesheet('player2', 'assets/DogIdle.png', { frameWidth: 48, frameHeight: 48 });
+    this.load.spritesheet('player2run', 'assets/DogWalk.png', { frameWidth: 48, frameHeight: 48 });
+    this.load.spritesheet('player2runL', 'assets/DogWalkL.png', { frameWidth: 48, frameHeight: 48 });
 }
 
 function create ()
