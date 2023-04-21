@@ -186,7 +186,7 @@ function update ()
 {
     if (gameOver)
     {
-        playerA.anims.play('hurt', true);
+        location.reload(true);
         return;
     }
 
