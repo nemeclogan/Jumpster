@@ -35,8 +35,10 @@ function preload ()
 {
     this.load.image('sky', 'assets/sky.png');
     this.load.image('ground', 'assets/platform.png');
-    this.load.image('apple', 'assets/apple.png');
+    this.load.image('chicken', 'assets/ChickenLeg.png');
+    this.load.image('fish', 'assets/Fish.png');
     this.load.image('bomb', 'assets/bomb.png');
+    this.load.image('ground1', 'assets/ground.png');
 
     this.load.spritesheet('player1', 'assets/CatIdle.png', { frameWidth: 48, frameHeight: 48 });
     this.load.spritesheet('player1run', 'assets/CatWalk.png', { frameWidth: 48, frameHeight: 48 });
@@ -61,7 +63,7 @@ function create ()
 
     //  Here we create the ground.
     //  Scale it to fit the width of the game (the original sprite is 400x32 in size)
-    platforms.create(400, 568, 'ground').setScale(2).refreshBody();
+    platforms.create(400, 568, 'ground1').setScale(2).refreshBody();
 
     //  Now let's create some ledges
     platforms.create(600, 400, 'ground');
@@ -101,11 +103,11 @@ function create ()
         repeat: -1
     });
 
-    this.anims.create({
-        key: 'hurt',
-        frames: [ {key: 'player1hurt', frame: 2} ],
-        freameRate:20
-    })
+   // this.anims.create({
+    //    key: 'hurt',
+    //    frames: [ {key: 'player1hurt', frame: 2} ],
+    //    freameRate:20
+    //})
 
     this.anims.create({
         key: 'idle',
@@ -134,11 +136,11 @@ function create ()
         repeat: -1
     });
 
-    this.anims.create({
-        key: 'hurt2',
-        frames: [ {key: 'player2hurt', frame: 2} ],
-        freameRate:20
-    })
+   // this.anims.create({
+    //    key: 'hurt2',
+    //    frames: [ {key: 'player2hurt', frame: 2} ],
+    //    freameRate:20
+   // })
 
     this.anims.create({
         key: 'idle2',
@@ -150,18 +152,31 @@ function create ()
     cursors = this.input.keyboard.createCursorKeys();
     keys = this.input.keyboard.addKeys('W,A,D');
 
-    //  Some apples to collect, 12 in total, evenly spaced 70 pixels apart along the x axis
-    apples = this.physics.add.group({
-        key: 'apple',
-        repeat: 11,
+    //  Some food to collect, 12 in total, evenly spaced 70 pixels apart along the x axis
+   
+   // chicken for dog
+    chickens = this.physics.add.group({
+        key: 'chicken',
+        repeat: 6,
         setXY: { x: 12, y: 0, stepX: 70 }
     });
 
-    apples.children.iterate(function (child) {
+    chickens.children.iterate(function (child) {
 
-        //  Give each apple a slightly different bounce
+        //  Give each chicken a slightly different bounce
         child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
 
+    });
+
+    // fish for cat
+    fishes = this.physics.add.group({
+        key: 'fish',
+        repeat: 5,
+        setXY: { x:400, y:0, stepX: 70}
+    });
+
+    fishes.children.iterate(function (child){
+        child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
     });
 
     bombs = this.physics.add.group();
@@ -169,15 +184,16 @@ function create ()
     //  The score
     scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
 
-    //  Collide the players and the apples with the platforms
+    //  Collide the players and the food with the platforms
     this.physics.add.collider(playerA, platforms);
     this.physics.add.collider(playerB, platforms);
-    this.physics.add.collider(apples, platforms);
+    this.physics.add.collider(chickens, platforms);
+    this.physics.add.collider(fishes, platforms);
     this.physics.add.collider(bombs, platforms);
 
-    //  Checks to see if the player overlaps with any of the apples, if he does call the collectStar function
-    this.physics.add.overlap(playerA, apples, collectApple, null, this);
-    this.physics.add.overlap(playerB, apples, collectApple, null, this);
+    //  Checks to see if the player overlaps with any of the chickens and fishes, if they do call the collectFood function
+    this.physics.add.overlap(playerA, fishes, collectFood, null, this);
+    this.physics.add.overlap(playerB, chickens, collectFood, null, this);
     this.physics.add.collider(playerA, bombs, hitBomb, null, this);
     this.physics.add.collider(playerB, bombs, hitBomb, null, this);
 }
@@ -259,23 +275,28 @@ function update ()
 }
 
 
-function collectApple (playerA, apple)
+function collectFood (playerA, chicken)
 {
-    apple.disableBody(true, true);
+    chicken.disableBody(true, true);
 
     //  Add and update the score
     score += 10;
     scoreText.setText('Score: ' + score);
 
-    if (apples.countActive(true) === 0)
+    if (chickens.countActive(true) === 0 && fishes.countActive(true) === 0)
     {
-        //  A new batch of apples to collect
-        apples.children.iterate(function (child) {
+        //  A new batch of food to collect
+        chickens.children.iterate(function (child) {
 
             child.enableBody(true, child.x, 0, true, true);
 
         });
+        fishes.children.iterate(function (child) {
 
+            child.enableBody(true, child.x, 0, true, true);
+
+        });
+       
         var x = (playerA.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
 
         var bomb = bombs.create(x, 16, 'bomb');
@@ -286,6 +307,8 @@ function collectApple (playerA, apple)
 
     }
 }
+
+
 
 function hitBomb (playerA, bomb)
 {
