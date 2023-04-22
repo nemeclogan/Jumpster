@@ -48,6 +48,8 @@ function preload ()
     this.load.spritesheet('player2', 'assets/DogIdle.png', { frameWidth: 48, frameHeight: 48 });
     this.load.spritesheet('player2run', 'assets/DogWalk.png', { frameWidth: 48, frameHeight: 48 });
     this.load.spritesheet('player2runL', 'assets/DogWalkL.png', { frameWidth: 48, frameHeight: 48 });
+    // Load the font.
+    this.load.bitmapFont("pixelFont", "assets/font/font.png", "assets/font/font.xml")
 }
 
 function create ()
@@ -182,7 +184,8 @@ function create ()
     bombs = this.physics.add.group();
 
     //  The score
-    scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
+    //scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
+    scoreText = this.add.bitmapText(16,16, "pixelFont", 'SCORE: 0',20);
 
     //  Collide the players and the food with the platforms
     this.physics.add.collider(playerA, platforms);
