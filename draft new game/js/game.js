@@ -14,7 +14,8 @@ var config = {
         preload: preload,
         create: create,
         update: update
-    }
+    },
+    
 };
 
 var player;
@@ -48,6 +49,7 @@ function preload ()
     this.load.spritesheet('player2', 'assets/DogIdle.png', { frameWidth: 48, frameHeight: 48 });
     this.load.spritesheet('player2run', 'assets/DogWalk.png', { frameWidth: 48, frameHeight: 48 });
     this.load.spritesheet('player2runL', 'assets/DogWalkL.png', { frameWidth: 48, frameHeight: 48 });
+    
     // Load the font.
     this.load.bitmapFont("pixelFont", "assets/font/font.png", "assets/font/font.xml")
 }
@@ -105,12 +107,6 @@ function create ()
         repeat: -1
     });
 
-   // this.anims.create({
-    //    key: 'hurt',
-    //    frames: [ {key: 'player1hurt', frame: 2} ],
-    //    freameRate:20
-    //})
-
     this.anims.create({
         key: 'idle',
         frames: [ { key: 'player1', frame: 4 } ],
@@ -138,11 +134,6 @@ function create ()
         repeat: -1
     });
 
-   // this.anims.create({
-    //    key: 'hurt2',
-    //    frames: [ {key: 'player2hurt', frame: 2} ],
-    //    freameRate:20
-   // })
 
     this.anims.create({
         key: 'idle2',
@@ -183,8 +174,7 @@ function create ()
 
     bombs = this.physics.add.group();
 
-    //  The score
-    //scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
+    //  The score label (top left)
     scoreText = this.add.bitmapText(16,16, "pixelFont", 'SCORE: 0',20);
 
     //  Collide the players and the food with the platforms
@@ -199,13 +189,16 @@ function create ()
     this.physics.add.overlap(playerB, chickens, collectFood, null, this);
     this.physics.add.collider(playerA, bombs, hitBomb, null, this);
     this.physics.add.collider(playerB, bombs, hitBomb, null, this);
+
 }
 
 function update ()
 {
+    
     if (gameOver)
     {
-        location.reload(true);
+        // Delayed end screen.
+        let timedEvent = this.time.delayedCall(2000,endGame,[score,scoreText,this]);
         return;
     }
 
@@ -284,7 +277,7 @@ function collectFood (playerA, chicken)
 
     //  Add and update the score
     score += 10;
-    scoreText.setText('Score: ' + score);
+    scoreText.setText('SCORE: ' + score);
 
     if (chickens.countActive(true) === 0 && fishes.countActive(true) === 0)
     {
@@ -325,4 +318,38 @@ function hitBomb (playerA, bomb)
     playerB.setVelocity(0, 0);
 
     gameOver = true;
+}
+
+function endGame(score,scoreText,scene){
+    // Remove old score text
+    scoreText.setText('');
+
+    // Create overlay graphic
+    let graphics = scene.add.graphics();
+    graphics.fillStyle(0x000000 , 0.8);
+    graphics.beginPath();
+    graphics.moveTo(50, 40);
+    graphics.lineTo(750, 40);
+    graphics.lineTo(750, 500);
+    graphics.lineTo(50, 500);
+    graphics.lineTo(50, 40);
+    graphics.closePath();
+    graphics.fillPath();
+    // Add text on the overlay
+    scene.add.bitmapText(270,150, "pixelFont", `GAME OVER!`,70);
+    scene.add.bitmapText(320,250, "pixelFont", `SCORE: ${score}`,40);
+    // Create restart button
+    let button = scene.add.text(275, 350, 'Restart?', {
+        fontFamily: 'Quicksand',
+        fontSize: '48px',
+        color: '#000000',
+        backgroundColor: '#E4B526',
+        stroke: '#000000',
+        strokeThickness: 2,
+        padding: { left: 20, right: 20, top: 10, bottom: 10 }
+    })
+    // Add restart functionality
+    button.setInteractive();
+    button.on('pointerdown',()=>{location.reload(true);})
+    
 }
